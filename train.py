@@ -16,7 +16,7 @@ from model import Glow
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 parser = argparse.ArgumentParser(description="Glow trainer")
-parser.add_argument("--batch", default=16, type=int, help="batch size")
+parser.add_argument("--batch", default=32, type=int, help="batch size")
 parser.add_argument("--iter", default=200000, type=int, help="maximum iterations")
 parser.add_argument(
     "--n_flow", default=32, type=int, help="number of flows in each block"
@@ -95,7 +95,7 @@ def calc_loss(log_p, logdet, image_size, n_bins):
 
 def train(args, model, optimizer):
     dataset = iter(sample_data(args.path, args.batch, args.img_size))
-    n_bins = 2.0 ** args.n_bits
+    n_bins = 2.0**args.n_bits
 
     z_sample = []
     z_shapes = calc_z_shapes(3, args.img_size, args.n_flow, args.n_block)
@@ -140,14 +140,14 @@ def train(args, model, optimizer):
                 f"Loss: {loss.item():.5f}; logP: {log_p.item():.5f}; logdet: {log_det.item():.5f}; lr: {warmup_lr:.7f}"
             )
 
-            if i % 100 == 0:
+            if i % 100 == 0 or i == 0:
                 with torch.no_grad():
                     utils.save_image(
                         model_single.reverse(z_sample).cpu().data,
                         f"sample/{str(i + 1).zfill(6)}.png",
                         normalize=True,
                         nrow=10,
-                        range=(-0.5, 0.5),
+                        # range=(-0.5, 0.5),
                     )
 
             if i % 10000 == 0:
